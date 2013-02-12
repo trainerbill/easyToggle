@@ -10,32 +10,77 @@ var settings =  {
 	      'offButtonText'		: 'OFF',
 	      'confirm'			: false,
 	      'confirmText'		: 'Are you sure?',
+	      'disabledText'		: 'Disabled',
 };
 
 var methods = {
 	init: function(){
+		var container = $(this);
+		container.addClass("easytoggle-contain");
+		container.find('span').hide()
+		container.find('input').hide();
 		
-		$(this).addClass("easytoggle-contain");
-		$(this).find('span').hide()
-		$(this).find('input').hide();
-		
-		if($(this).find("input").is(':disabled'))
-		{
+		container.find("input").each(function(){		
+			$(this).wrap('<div class="toggle-contain"></div>');
 			
-			$(this).append('<ul><li>'+$(this).find('span').text()+'</li></ul>​');
-			$(this).find('ul > li:first-child').addClass('easytoggle-disabled');
-			return true;
+			
+			if($(this).is(':disabled'))
+			{
+				$(this).after('<ul><li class="easytoggle-disabled">'+settings['disabledText']+'</li></ul>​');	
+				
+			}
+			else
+			{
+	
+				$(this).after('<ul><li '+(($(this).is(':checked')) ? ' class="easytoggle-on" ' : '' )+'>'+settings['onButtonText']+'</li><li '+((!$(this).is(':checked')) ? ' class="easytoggle-off" ' : '' )+'>'+settings['offButtonText']+'</li></ul>​');
+			}
+		
+			
+			
+			
+		});	
+		
+		//Setup click functions for li tags
+		container.find("div.toggle-contain").each(function(){
+			var single = $(this);
+			single.find("ul > li").each(function(){
+				
+				console.log(single);
+				$(this).click(function(){
+					if(settings.confirm)
+					{
+						if(!confirm(settings.confirmText))
+							return false;
+					}
+				
+				
+					methods.etoggle.call(this,single);
+				
+				});
+			});
+		
+		});
+	},
+	
+	etoggle: function(contain){
+		var input = contain.find('input');
+		if(input.is(':checked'))
+		{
+			contain.find('ul > li').attr('class','');
+			contain.find('ul > li:last-child').attr('class','easytoggle-off');
+			input.removeAttr('checked');
+			
+			
+		}
+		else
+		{
+			contain.find('ul > li').attr('class','');
+			contain.find('ul > li:first-child').attr('class','easytoggle-on');
+			input.attr('checked','checked');
 		}
 		
-		
-		$(this).append('<ul><li>'+settings['onButtonText']+'</li><li>'+settings['offButtonText']+'</li></ul>​');
-		
-		if($(this).find('input').is(':checked'))
-			$(this).find("ul > li:first-child").addClass('easytoggle-on');
-		else
-			$(this).find("ul > li:last-child").addClass('easytoggle-off');
-			
-		
+		if(settings.after)
+			settings.after.call($this);
 	},
 };
 
@@ -45,46 +90,8 @@ $.fn.easyToggle = function( options ) {
 	settings = $.extend( settings, options);
 	
 	return this.each(function() {
-		var $this = $(this);
-		var input = $this.find("input");
+		
 		methods.init.call(this);
-		
-		if(input.is(':disabled'))
-		{
-			return true;	
-		}
-		
-		
-		
-		$this.find('ul > li').click(function(){
-		
-			if(!$(this).hasClass('easytoggle-on') && !$(this).hasClass('easytoggle-off') && !input.is(':disabled'))
-			{	
-				if(settings.confirm)
-				{
-					if(!confirm(settings.confirmText))
-						return false;
-				}
-				
-				input.trigger('click');
-				$(this).removeClass("easytoggle-on easytoggle-off");
-				
-				if(input.is(':checked'))
-				{
-					$(this).next().removeClass("easytoggle-on easytoggle-off");
-					$(this).addClass("easytoggle-on");
-					input.attr('checked','checked');
-				}
-				else
-				{
-					$(this).prev().removeClass("easytoggle-on easytoggle-off");
-					$(this).addClass("easytoggle-off");
-					input.removeAttr('checked');
-				}
-				if(settings.after)
-					settings.after.call($this);
-			}
-		});	
 	});
 };
 
