@@ -42,10 +42,11 @@ var methods = {
 		
 		//Setup click functions for li tags
 		container.find("div.toggle-contain").each(function(){
+			if($(this).find('input').is(':disabled'))
+				return true;
 			var single = $(this);
 			single.find("ul > li").each(function(){
 				
-				console.log(single);
 				$(this).click(function(){
 					if(settings.confirm)
 					{
